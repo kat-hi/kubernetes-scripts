@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-mongo1
+  namespace: testing
+  labels:
+    app: test-mongo1
+    tier: database
+spec:
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: test-mongo1
+        tier: database
+    spec:
+      containers:
+        - name: test-mongo1
+          image: mongo
+          ports:
+            - name: client-port
+              containerPort: 27017
+          volumeMounts:
+            - name: mongo-pvc-test
+              mountPath: "/data/db"
+          resources:
+            requests:
+              cpu: "2"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+      volumes:
+        - name: mongo-pvc-test
+          persistentVolumeClaim:
+            claimName: mongo-pvc-test
+  selector:
+    matchLabels:
+      app: test-mongo1

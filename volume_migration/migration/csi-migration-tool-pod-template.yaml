@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: csi-migration-toolpod
+  namespace: testing
+spec:
+  containers:
+  - image: lockat/toolpod:v14
+    name: toolpod
+    command: [ "/bin/sh" ]
+    args: [ "-c", "while true; do echo hello; sleep 10;done" ]
+  restartPolicy: Never
+

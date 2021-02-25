@@ -1,0 +1,806 @@
+{
+  "_id": "41ee693ebfc9481e8939ca38233094d3",
+  "_rev": "1-8e111a170746a9105fb4a33d53dcddd8",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.397046,
+          52.525902
+        ]
+      },
+      "properties": {
+        "name": "Alexianer St. Hedwig Kliniken Berlin GmbH, Alexianer St. Hedwig-Krankenhaus",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T09:24:07Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.369843,
+          52.534919
+        ]
+      },
+      "properties": {
+        "name": "Bundeswehrkrankenhaus Berlin, Hauptstandort",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:09:06Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.37823,
+          52.52367
+        ]
+      },
+      "properties": {
+        "name": "Charité Universitätsmedizin Berlin, Hauptstandort Charité Universitätsmedizin Berlin",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "BEGRENZT"
+        },
+        "last_update": "2020-11-30T04:41:05Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.438961,
+          52.524481
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Klinikum im Friedrichshain",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:29:29Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.508368,
+          52.526881
+        ]
+      },
+      "properties": {
+        "name": "Ev. Krankenhaus Königin Elisabeth Herzberge, Evangelisches Krankenhaus Königin Elisabeth Herzberge gGmbH",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T09:44:49Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.494809,
+          52.514034
+        ]
+      },
+      "properties": {
+        "name": "Sana Klinikum Lichtenberg",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:43:54Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.317198,
+          52.481245
+        ]
+      },
+      "properties": {
+        "name": "Sankt Gertrauden-Krankenhaus GmbH",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:31:42Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.364198,
+          52.503591
+        ]
+      },
+      "properties": {
+        "name": "Ev. Elisabeth Klinik Krankenhausbetriebs gGmbH, Hauptstandort",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T09:29:42Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.345418,
+          52.506387
+        ]
+      },
+      "properties": {
+        "name": "Franziskus-Krankenhaus Berlin, Hauptstandort",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T07:35:13Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.40902,
+          52.494627
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Klinikum Am Urban",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:28:36Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.389266,
+          52.458933
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Wenckebach-Klinikum",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:32:29Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.372828,
+          52.478649
+        ]
+      },
+      "properties": {
+        "name": "St. Joseph Krankenhaus Berlin-Tempelhof, Hauptstandort",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:55:44Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.345513,
+          52.463039
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Auguste-Viktoria-Klinikum",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "NICHT_VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:26:39Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.320401,
+          52.4418
+        ]
+      },
+      "properties": {
+        "name": "Charité Universitätsmedizin Berlin, Charité Campus Benjamin Franklin",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "BEGRENZT"
+        },
+        "last_update": "2020-11-30T07:19:28Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.325927,
+          52.432553
+        ]
+      },
+      "properties": {
+        "name": "Krankenhaus Bethel Berlin gGmbH, Krankenhaus Bethel Berlin",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T09:57:02Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.348082,
+          52.424283
+        ]
+      },
+      "properties": {
+        "name": "St. Marien-Krankenhaus Lankwitz",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T07:08:39Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.458397,
+          52.438175
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Klinikum Neukölln",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:25:44Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.595805,
+          52.440262
+        ]
+      },
+      "properties": {
+        "name": "DRK Kliniken Berlin Köpenick",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:09:32Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.592644,
+          52.505881
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Klinikum Kaulsdorf",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:30:16Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.566016,
+          52.519049
+        ]
+      },
+      "properties": {
+        "name": "BG Klinikum Unfallkrankenhaus Berlin gGmbH",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "VERFUEGBAR"
+        },
+        "last_update": "2020-11-30T07:15:50Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.45185,
+          52.554889
+        ]
+      },
+      "properties": {
+        "name": "Park-Klinik Weißensee",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:37:09Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.505311,
+          52.631861
+        ]
+      },
+      "properties": {
+        "name": "Evangelische Lungenklinik Berlin, Hauptstandort",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "NICHT_VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:06:52Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.511302,
+          52.631419
+        ]
+      },
+      "properties": {
+        "name": "Helios Klinikum Berlin-Buch GmbH, Helios Klinikum Berlin-Buch",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "VERFUEGBAR"
+        },
+        "last_update": "2020-11-30T07:37:41Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.413936,
+          52.571388
+        ]
+      },
+      "properties": {
+        "name": "Caritas-Klinik Maria Heimsuchung Berlin Pankow, Caritas-Klinik Maria Heimsuchung Berlin-Pankow",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:16:08Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.370569,
+          52.555279
+        ]
+      },
+      "properties": {
+        "name": "Jüdisches Krankenhaus Berlin, Krankenhaus",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:39:21Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.347828,
+          52.542234
+        ]
+      },
+      "properties": {
+        "name": "Charité Universitätsmedizin Berlin, Charité Campus Virchow Klinikum",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "NICHT_VERFUEGBAR"
+        },
+        "last_update": "2020-11-30T00:30:53Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.347769,
+          52.542387
+        ]
+      },
+      "properties": {
+        "name": "Deutsches Herzzentrum Berlin, Hauptstandort",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "VERFUEGBAR"
+        },
+        "last_update": "2020-11-30T06:58:43Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.376277,
+          52.557387
+        ]
+      },
+      "properties": {
+        "name": "DRK Kliniken Berlin Mitte",
+        "status": {
+          "statusLowCare": "KEINE_ANGABE",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T05:44:49Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.295364,
+          52.624685
+        ]
+      },
+      "properties": {
+        "name": "Dominikus-Krankenhaus Berlin-Hermsdorf GmbH, Caritas-Klinik Dominikus Berlin-Reinickendorf",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "NICHT_VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:19:14Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.308975,
+          52.589849
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Humboldt-Klinikum",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:27:47Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.206897,
+          52.550157
+        ]
+      },
+      "properties": {
+        "name": "Vivantes - Netzwerk für Gesundheit GmbH, Klinikum Spandau",
+        "status": {
+          "statusLowCare": "NICHT_VERFUEGBAR",
+          "statusHighCare": "NICHT_VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T10:33:08Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.157562,
+          52.562405
+        ]
+      },
+      "properties": {
+        "name": "Evangelisches Waldkrankenhaus Spandau, Stadtrandstraße 555-561",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:48:46Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.277062,
+          52.518886
+        ]
+      },
+      "properties": {
+        "name": "DRK Kliniken Berlin Westend",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "NICHT_VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T05:53:49Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.233627,
+          52.508026
+        ]
+      },
+      "properties": {
+        "name": "Paulinenhaus Krankenanstalt e.V., Paulinenkrankenhaus gGmbH",
+        "status": {
+          "statusLowCare": "KEINE_ANGABE",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:54:06Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.289496,
+          52.521791
+        ]
+      },
+      "properties": {
+        "name": "Schlosspark-Klinik",
+        "status": {
+          "statusLowCare": "KEINE_ANGABE",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:36:54Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.160882,
+          52.461717
+        ]
+      },
+      "properties": {
+        "name": "Gemeinschaftskrankenhaus Havelhöhe gGmbH, Gemeinschaftskrankenhaus Havelhöhe",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "NICHT_VERFUEGBAR"
+        },
+        "last_update": "2020-11-30T07:19:38Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.161751,
+          52.462407
+        ]
+      },
+      "properties": {
+        "name": "MEDIAN Klinik Berlin Kladow, Fachkrankenhaus f. neurologische Frührehabilitation, MEDIAN Klinik BErlin Kladow; Fachkrankenhaus für neurologische Frührehabilitation",
+        "status": {
+          "statusLowCare": "KEINE_ANGABE",
+          "statusHighCare": "KEINE_ANGABE",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-09-17T12:28:50Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.164233,
+          52.419559
+        ]
+      },
+      "properties": {
+        "name": "Immanuel Krankenhaus Berlin, Standort Berlin Wannsee",
+        "status": {
+          "statusLowCare": "VERFUEGBAR",
+          "statusHighCare": "VERFUEGBAR",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:26:15Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.219186,
+          52.431348
+        ]
+      },
+      "properties": {
+        "name": "Evangelisches Krankenhaus Hubertus",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:50:33Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.240225,
+          52.444185
+        ]
+      },
+      "properties": {
+        "name": "Krankenhaus Waldfriede e.V., Krankenhaus Waldfriede",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T06:03:25Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.252992,
+          52.422884
+        ]
+      },
+      "properties": {
+        "name": "Helios Klinikum Emil von Behring GmbH, Helios Klinikum Emil von Behring",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T08:21:55Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.292227,
+          52.491269
+        ]
+      },
+      "properties": {
+        "name": "Martin-Luther-Krankenhausbetriebs GmbH, Martin-Luther-Krankenhaus",
+        "status": {
+          "statusLowCare": "BEGRENZT",
+          "statusHighCare": "BEGRENZT",
+          "statusECMO": "KEINE_ANGABE"
+        },
+        "last_update": "2020-11-30T13:49:56Z"
+      }
+    }
+  ],
+  "date": "01.12.2020"
+}

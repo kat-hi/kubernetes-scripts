@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-mongo1-service
+  namespace: testing
+spec:
+  ports:
+    - port: 27017
+  selector:
+    app: test-mongo1
+  type: LoadBalancer
