@@ -1,5 +1,4 @@
-old_new_pathmapper = {'/mnt/old/0': '/data/db'}
-mountpaths = [{'mountPath': '/data/db', 'name': 'mongo-pvc-test'}]
+import json
 import subprocess
 import sys
 import os
@@ -15,7 +14,7 @@ def check_if_sync_complete(mountpath):
 
     if len(logs) == subdir_count + 1:
         print('remove rsynclog')
-        #os.remove('/mnt/new/rsynclog.txt')
+        os.remove('/mnt/new/rsynclog.txt')
     else:
         with open(f'{OLD_MOUNTPATH}/{LOGFILE}', 'a+') as log:
             print('synced dir count does not match')
@@ -33,13 +32,23 @@ def remove_logfiles_if_exist(new_mountpath):
 
 def sync(subdir):
     old_dir = f'{OLD_MOUNTPATH}/{subdir}'
-    print(f'starting rsync for contents in subdir {old_dir} into {old_new_pathmapper[old_dir]}')
-    subprocess.run(f'rsync -a -v {old_dir}/ {old_new_pathmapper[old_dir]}', shell=True)
+    print(f'starting rsync for contents in subdir {old_dir} into {pathmapper[old_dir]}')
+    subprocess.run(f'rsync -a -v {old_dir}/ {pathmapper[old_dir]}', shell=True)
     log.write(str(i))
     print(f'rsync finished: {old_dir}')
 
 
 if __name__ == '__main__':
+    pathmapper = json.loads(os.environ.get("pathmapper"))
+    mountpaths = json.loads(os.environ.get("mountpaths"))
+
+    if not pathmapper or not mountpaths:
+        print('No env found. syncing aborted.')
+        sys.exit(0)
+
+    print(f'{os.environ.get("pathmapper")}')
+    print(f'{os.environ.get("mountpath")}')
+
 
     for mountpath in mountpaths:
         remove_logfiles_if_exist(mountpath['mountPath'])

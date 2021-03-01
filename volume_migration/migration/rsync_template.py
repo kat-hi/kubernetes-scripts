@@ -6,6 +6,10 @@ from shutil import copyfile
 OLD_MOUNTPATH = '/mnt/old'
 LOGFILE = 'rsynclog.txt'
 
+pathmapper = sys.argv[1]
+mountpaths = sys.argv[2]
+
+
 
 def check_if_sync_complete(mountpath):
     with open(f'{mountpath}/{LOGFILE}', 'r') as log:
@@ -31,8 +35,8 @@ def remove_logfiles_if_exist(new_mountpath):
 
 def sync(subdir):
     old_dir = f'{OLD_MOUNTPATH}/{subdir}'
-    print(f'starting rsync for contents in subdir {old_dir} into {old_new_pathmapper[old_dir]}')
-    subprocess.run(f'rsync -a -v {old_dir}/ {old_new_pathmapper[old_dir]}', shell=True)
+    print(f'starting rsync for contents in subdir {old_dir} into {pathmapper[old_dir]}')
+    subprocess.run(f'rsync -a -v {old_dir}/ {pathmapper[old_dir]}', shell=True)
     log.write(str(i))
     print(f'rsync finished: {old_dir}')
 

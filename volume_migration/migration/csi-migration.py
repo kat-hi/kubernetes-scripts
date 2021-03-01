@@ -78,12 +78,10 @@ def prepare_toolpod(namespace, saved_old_volumes, mountpaths):
     old_volumes = []
     new_volumes = []
 
-    print(os.getcwd())
-
     with open(f'csi-migration-tool-pod-template.yaml', 'r') as file:
         pod = yaml.load(file, Loader=yaml.FullLoader)
         pod['metadata']['namespace'] = namespace
-        old_new_pathmapper = {}
+        pathmapper = {}
 
         for j in range(0, len(saved_old_volumes)):
             old_volume_name = saved_old_volumes[j]
@@ -96,7 +94,7 @@ def prepare_toolpod(namespace, saved_old_volumes, mountpaths):
             volume_mount_old.append({'mountPath': f'/mnt/old/{j}', 'name': old_volume_name})
             volume_mount_new.append({'mountPath': f'{mountpath}', 'name': new_volume_name})
 
-            old_new_pathmapper[f'/mnt/old/{j}'] = mountpath
+            pathmapper[f'/mnt/old/{j}'] = mountpath
 
             old_volumes.append({'name': old_volume_name, 'persistentVolumeClaim': {'claimName': old_volume_name}})
             new_volumes.append({'name': new_volume_name, 'persistentVolumeClaim': {'claimName': new_volume_name}})
@@ -104,10 +102,15 @@ def prepare_toolpod(namespace, saved_old_volumes, mountpaths):
         pod['spec']['containers'][0]['volumeMounts'] = volume_mount_new + volume_mount_old
         pod['spec']['volumes'] = old_volumes + new_volumes
 
+        env_vars = [{'name': 'pathmapper', 'value': json.dumps(pathmapper)},
+                   {'name': 'mountpaths', 'value': json.dumps(mountpaths)}]
+
+        pod['spec']['containers'][0]['env'] = env_vars
+
     with open(f'csi-migration-tool-pod.yaml', 'w') as file:
         yaml.dump(pod, file, allow_unicode=True)
 
-    return old_new_pathmapper
+    return pathmapper
 
 
 def _remove_old_volume_from_deployment(old_mounts, volume_list, old_vol):
@@ -218,27 +221,18 @@ def get_namespaces_scope(mode):
     return ns
 
 
-def insert_mountpath_into_rsync_template(mountpaths, old_new_pathmapper):
-    copyfile('rsync_template.py', 'rsync.py')
-
-    mountpathnames = [mountpath['mountPath'] for mountpath in mountpaths]
-
-    with open('rsync.py', 'a+') as outfile:
-        for i in range(0, len(mountpaths)):
-            outfile.write(f'test{i}')
-
-    with open('rsync_template.py', 'r') as f:
-        with open('rsync.py', 'w') as f2:
-            for i in range(0, len(mountpathnames)):
-                f2.write(f'old_new_pathmapper = {str(old_new_pathmapper)}\n')
-                f2.write(f'mountpaths = {str(mountpaths)}\n')
-            f2.write(f.read())
-
-
 def build_and_push_rsync_image():
-    image_version = 'v14'
+    image_version = 'v17'
     subprocess.run(f'docker build -t lockat/toolpod:{image_version} .', shell=True)
     subprocess.run(f'docker push lockat/toolpod:{image_version}', shell=True)
+
+
+def deployment_only_has_one_container(deployment):
+    last_applied = eval(k8s_deployment.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'])
+    if len(last_applied['spec']['template']['spec']['containers']) == 1:
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
@@ -277,14 +271,13 @@ if __name__ == '__main__':
                     is_flexvolume = None
 
             if is_flexvolume or testing:
-                kubectl(f'scale deploy {deployment_name} --replicas=0', namespace)
+                kubectl(f'scale deploy {deployment_name} --replicas=0', namespace)  # wait
                 k8s_deployment = apps_v1.read_namespaced_deployment(namespace=namespace, name=deployment_name)
-                current_volumes = k8s_deployment.spec.template.spec.volumes
-                saved_old_volumes = create_csi_volumes(current_volumes, namespace)
-                mountpaths = get_volume_list_and_mount_paths(k8s_deployment)[0]
-                old_new_pathmapper = prepare_toolpod(namespace, saved_old_volumes, mountpaths) # mount old and new volume(s)
-                insert_mountpath_into_rsync_template(mountpaths, old_new_pathmapper)
-                build_and_push_rsync_image()
-                start_toolpod(namespace)  # execute rsync
-                last_applied = replace_old_volumes_with_new(k8s_deployment, saved_old_volumes)  # add mountPath and pvc
-                create_new_deployment(last_applied)  # apply to k8s
+                if deployment_only_has_one_container(k8s_deployment):
+                    current_volumes = k8s_deployment.spec.template.spec.volumes
+                    saved_old_volumes = create_csi_volumes(current_volumes, namespace)
+                    mountpaths = get_volume_list_and_mount_paths(k8s_deployment)[0]
+                    pathmapper = prepare_toolpod(namespace, saved_old_volumes, mountpaths)  # mount old and new volume(s)
+                    start_toolpod(namespace)  # execute rsync
+                    last_applied = replace_old_volumes_with_new(k8s_deployment, saved_old_volumes)  # add mountPath and pvc
+                    create_new_deployment(last_applied)  # apply to k8s
