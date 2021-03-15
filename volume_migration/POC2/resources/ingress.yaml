@@ -1,0 +1,24 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+metadata:
+  name: poc-test-ingress
+  namespace: testing
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  tls:
+  - hosts:
+      - synctest.app.datexis.com
+    secretName: poc-sync-ingress-tls
+  rules:
+  - host: synctest.app.datexis.com
+    http:
+      paths:
+      - backend:
+          serviceName: poc-test-service
+          servicePort: 5000

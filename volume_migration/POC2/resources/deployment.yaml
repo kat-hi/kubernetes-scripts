@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-test
+  namespace: testing
+  labels:
+    app: poc-test
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: poc-test
+    spec:
+      containers:
+        - name: poc-test
+          image: lockat/poctest:v1
+          ports:
+            - name: client-port
+              containerPort: 5000
+          volumeMounts:
+            - name: poctestpvc
+              mountPath: "/data"
+            - name: poctestpvc2
+              mountPath: "/path/to/data"
+          resources:
+            requests:
+              cpu: "2"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+      volumes:
+        - name: poctestpvc
+          persistentVolumeClaim:
+            claimName: poctestpvc
+        - name: poctestpvc2
+          persistentVolumeClaim:
+            claimName: poctestpvc2
+  selector:
+    matchLabels:
+      app: poc-test
