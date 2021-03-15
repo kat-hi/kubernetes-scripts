@@ -5,7 +5,7 @@ metadata:
   namespace: testing
 spec:
   containers:
-  - image: lockat/toolpod:v17
+  - image: lockat/toolpod:v18
     name: toolpod
   restartPolicy: Never
 

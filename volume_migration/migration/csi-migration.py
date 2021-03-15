@@ -1,36 +1,21 @@
-import subprocess
-import time
-from shutil import copyfile
-
-from kubernetes import client, config
-from kubernetes.client.models.v1_persistent_volume_claim import V1PersistentVolumeClaim
+import copy
 import os
 import sys
-import yaml
+from shutil import rmtree
+from kubernetes.client.models.v1_persistent_volume_claim import V1PersistentVolumeClaim
 from kubernetes.client.exceptions import ApiException
-import urllib3
-import json
-import colorama
+from kubernetes import client, config
 from colorama import Fore
+import argparse
+import colorama
 import dialog
+import json
+import subprocess
+import time
+import urllib3
+import yaml
 
-###############################
-# commandline arguments:
-# python3 csi-migration.py -a (include all namespaces)
-# python3 csi-migration.py -n namespace1 namespace2 (include two namespaces: 'namespace1' and 'namespace2'
-# python3 csi-migration.py (without argument: use testnamespace)
-###############################
-
-#  get deployments with flexvolumes
-#  set replicaset = 0
-#  get pvc that is referenced in deployment -- DONE
-#  create new pvc with same data but new storage-class -- DONE
-#  start tool pod that mounts both - old and new pvc -- DONE
-#  execute rsync to copy data from old to new -- DONE
-#  kill tool-pod -- DONE
-#  add new pvc and volume to the deployment -- DONE
-#  remove old pvc from deployment -- DONE
-#  apply new deployment -- DONE
+image_version = 'v20'
 
 
 def kubectl(command, namespace):
@@ -43,241 +28,285 @@ def kubectl(command, namespace):
         return data
 
 
-def _reset_toolpod_yaml():
-    with open(f'csi-migration-tool-pod.yaml', 'r') as file:
-        pod = yaml.load(file, Loader=yaml.FullLoader)
-        del pod['spec']['containers'][0]['volumeMounts']
-        del pod['spec']['volumes']
-    with open(f'csi-migration-tool-pod.yaml', 'w') as file:
-        yaml.dump(pod, file, allow_unicode=True)
+def start_toolpod(namespace, deployname):
+    dirpath = _get_resourcedir(namespace, deployname)
+    subprocess.run(f"kubectl apply -f {dirpath}/csi-migration-tool-pod.json -n {namespace}", shell=True)
+    wait_for_creating_or_terminating(name=f'csi-migration-toolpod-{deployname}', has_pods=False, resource='pods')
 
 
-def start_toolpod(namespace):
-    subprocess.run(f'kubectl apply -f csi-migration-tool-pod.yaml -n {namespace}', shell=True)
-    print(f"{Fore.GREEN} applying toolpod...")
-    found = False
-    while not found:
-        time.sleep(3.0)
-        try:
-            res = subprocess.check_output(f'kubectl get pod csi-migration-toolpod -n {namespace}', shell=True)
-            if res:
-                print(str(res.decode('utf-8')))
-                found = True
-        except subprocess.CalledProcessError:
-            pass
-    print(f"{Fore.GREEN} toolpod is running.")
-    time.sleep(2.0)
+def prepare_toolpod(namespace, saved_old_volumeclaims, deploy_name):
+    mountpaths = _get_volume_list_and_mount_paths(last_applied_deployment)[0]
 
-
-def prepare_toolpod(namespace, saved_old_volumes, mountpaths):
     print(f"{Fore.GREEN} preparing toolpod...")
-    print(f"{Fore.GREEN} volumes to be migrated: {len(saved_old_volumes)}")
-    volume_mount_old = []
-    volume_mount_new = []
-
-    old_volumes = []
-    new_volumes = []
+    print(f"{Fore.WHITE} volumes to be migrated: {len(saved_old_volumeclaims)}")
+    vol_dict = {'old_mounts': [], 'new_mounts': [], 'old_claims': [], 'new_claims': []}
 
     with open(f'csi-migration-tool-pod-template.yaml', 'r') as file:
         pod = yaml.load(file, Loader=yaml.FullLoader)
+        pod['metadata']['name'] = f'csi-migration-toolpod-{deploy_name}'
         pod['metadata']['namespace'] = namespace
+
         pathmapper = {}
 
-        for j in range(0, len(saved_old_volumes)):
-            old_volume_name = saved_old_volumes[j]
-            new_volume_name = old_volume_name+'-csi'
+        for j in range(0, len(saved_old_volumeclaims)):
+            old_claimname = saved_old_volumeclaims[j]
+            new_claimname = old_claimname + '-csi'
 
             for i in range(0, len(mountpaths)):
-                if mountpaths[i]['name'] == old_volume_name:
+                if mountpaths[i]['name'] == old_claimname:
                     mountpath = mountpaths[i]['mountPath']
 
-            volume_mount_old.append({'mountPath': f'/mnt/old/{j}', 'name': old_volume_name})
-            volume_mount_new.append({'mountPath': f'{mountpath}', 'name': new_volume_name})
+            vol_dict['old_mounts'].append({'mountPath': f'/mnt/old/{j}', 'name': old_claimname})
+            vol_dict['new_mounts'].append({'mountPath': f'{mountpath}', 'name': new_claimname})
 
             pathmapper[f'/mnt/old/{j}'] = mountpath
 
-            old_volumes.append({'name': old_volume_name, 'persistentVolumeClaim': {'claimName': old_volume_name}})
-            new_volumes.append({'name': new_volume_name, 'persistentVolumeClaim': {'claimName': new_volume_name}})
+            vol_dict['old_claims'].append(
+                {'name': old_claimname, 'persistentVolumeClaim': {'claimName': old_claimname}})
+            vol_dict['new_claims'].append(
+                {'name': new_claimname, 'persistentVolumeClaim': {'claimName': new_claimname}})
 
-        pod['spec']['containers'][0]['volumeMounts'] = volume_mount_new + volume_mount_old
-        pod['spec']['volumes'] = old_volumes + new_volumes
+        pod['spec']['containers'][0]['volumeMounts'] = vol_dict['new_mounts'] + vol_dict['old_mounts']
+        pod['spec']['volumes'] = vol_dict['old_claims'] + vol_dict['new_claims']
 
-        env_vars = [{'name': 'pathmapper', 'value': json.dumps(pathmapper)},
-                   {'name': 'mountpaths', 'value': json.dumps(mountpaths)}]
+        toolpod_env_vars = [{'name': 'pathmapper', 'value': json.dumps(pathmapper)},
+                            {'name': 'mountpaths', 'value': json.dumps(mountpaths)}]
 
-        pod['spec']['containers'][0]['env'] = env_vars
+        pod['spec']['containers'][0]['env'] = toolpod_env_vars
 
-    with open(f'csi-migration-tool-pod.yaml', 'w') as file:
-        yaml.dump(pod, file, allow_unicode=True)
-
-    return pathmapper
+    persist_resource(last_applied=pod, filename=f'{_get_resourcedir(namespace, deploy_name)}/csi-migration-tool-pod')
 
 
 def _remove_old_volume_from_deployment(old_mounts, volume_list, old_vol):
-    print(f"{Fore.GREEN} remove old volume(s) from deployment definition:")
-    for i in range(len(old_mounts)-1):
+    print(f"{Fore.WHITE} remove old volume(s) from deployment definition:")
+    for i in range(len(old_mounts) - 1):
         if old_mounts[i]['name'] == old_vol:
-            print(f"{Fore.GREEN} {old_mounts[i]['name']} deleted.")
+            print(f"{Fore.RED} mount {old_mounts[i]['name']} deleted.")
             del old_mounts[i]
         if volume_list[i]['name'] == old_vol:
-            print(f"{Fore.GREEN} {volume_list[i]['name']} deleted.")
+            print(f"{Fore.RED} volume {volume_list[i]['name']} deleted.")
             del volume_list[i]
     return old_mounts, volume_list
 
 
-def get_volume_list_and_mount_paths(k8s_deployment):
-    last_applied = None
+def get_last_applied_deployment(k8s_deployment):
     try:
         last_applied = k8s_deployment.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
         last_applied = (eval(last_applied))
-    except ApiException as e:
-        print(e.body)
-    if last_applied:
-        mount_paths = last_applied['spec']['template']['spec']['containers'][0]['volumeMounts']
-        volume_list = last_applied['spec']['template']['spec']['volumes']
-        return mount_paths, volume_list
-
-
-def replace_old_volumes_with_new(k8s_deployment, saved_old_volumes):
-    last_applied = None
-    try:
-        last_applied = k8s_deployment.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
-        last_applied = (eval(last_applied))
-    except ApiException as e:
-        print(e.body)
-    if last_applied:
-        current_volume_mounts = last_applied['spec']['template']['spec']['containers'][0]['volumeMounts']
-        old_mount_paths = last_applied['spec']['template']['spec']['containers'][0]['volumeMounts']
-        volume_list = last_applied['spec']['template']['spec']['volumes']
-        for current_mount in current_volume_mounts:
-            for old_vol in saved_old_volumes:
-                if current_mount['name'] == old_vol:
-                    mountpath = current_mount['mountPath']
-                    volume_mount = {'mountPath': mountpath, 'name': old_vol + '-csi'}
-                    print(f"{Fore.GREEN} add new volume mount to deployment {volume_mount} ")
-                    old_mount_paths.append(volume_mount)
-                    volume_list.append({'name': old_vol + '-csi', 'persistentVolumeClaim': {'claimName': old_vol + '-csi'}})
-
-
-        for old_vol in saved_old_volumes:
-            _remove_old_volume_from_deployment(old_mount_paths, volume_list, old_vol)
-
-        last_applied['spec']['template']['spec']['volumes'] = volume_list
-        last_applied['spec']['template']['spec']['containers'][0]['volumeMounts'] = old_mount_paths
-
         return last_applied
+    except ApiException as e:
+        return None
 
 
-def create_new_deployment(last_applied):
+def _get_volume_list_and_mount_paths(last_applied):
+    mount_paths = last_applied['spec']['template']['spec']['containers'][0]['volumeMounts']
+    volume_list = last_applied['spec']['template']['spec']['volumes']
+    return mount_paths, volume_list
 
+
+def replace_old_volumes_with_new(last_applied, saved_old_volume_claims):
+    modified_last_applied_deployment = copy.deepcopy(last_applied)
+    current_volume_mounts = modified_last_applied_deployment['spec']['template']['spec']['containers'][0][
+        'volumeMounts']
+    old_mount_paths = modified_last_applied_deployment['spec']['template']['spec']['containers'][0]['volumeMounts']
+    volume_list = modified_last_applied_deployment['spec']['template']['spec']['volumes']
+    for current_mount in current_volume_mounts:
+        for old_claim in saved_old_volume_claims:
+            if current_mount['name'] == old_claim:
+                mountpath = current_mount['mountPath']
+                volume_mount = {'mountPath': mountpath, 'name': old_claim + '-csi'}
+                print(f"{Fore.WHITE} add new volume mount to deployment {volume_mount}")
+                old_mount_paths.append(volume_mount)
+                volume_list.append({'name': old_claim + '-csi',
+                                    'persistentVolumeClaim': {'claimName': old_claim + '-csi'}})
+
+    for old_claim in saved_old_volume_claims:
+        _remove_old_volume_from_deployment(old_mount_paths, volume_list, old_claim)
+
+    modified_last_applied_deployment['spec']['template']['spec']['volumes'] = volume_list
+    modified_last_applied_deployment['spec']['template']['spec']['containers'][0]['volumeMounts'] = old_mount_paths
+
+    return modified_last_applied_deployment
+
+
+def create_new_deployment(deployname, ns, filename):
     try:
-        with open('deployment.json', 'w') as file:
-            json.dump(last_applied, file)
-        print(f"{Fore.GREEN} try create deployment '{last_applied['metadata']['name']}' i"
-              f"n namespace '{last_applied['metadata']['namespace']}'")
-        subprocess.run('kubectl apply -f deployment.json', shell=True)
+        print(f"{Fore.WHITE} create deployment '{deployname}' i"
+              f"n namespace '{ns}'")
+        subprocess.run(f'kubectl apply -f {filename}.json', shell=True)
         print(f"{Fore.GREEN} deployment created successfully")
     except ApiException as e:
         print(f'{Fore.RED} creating deployment failed: {e.body}')
 
 
-def create_csi_volumes(volumes, namespace):
-    saved_old_volumes = []
-    for vol in volumes:
-        k8s_vol = core_v1.read_namespaced_persistent_volume_claim(namespace=namespace, name=vol.name)
-        k8s_vol.spec.storage_class_name = 'cephcsi'
+def create_csi_volumes(volume_claims, ns, new_storageclass):
+    saved_old_volumeclaims = []
+    for volClaim in volume_claims:
+        volClaim.spec.storage_class_name = new_storageclass
 
-        last_applied = k8s_vol.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
-        last_applied = (eval(last_applied))
-        last_applied['spec']['storageClassName'] = 'cephcsi'
+        last_applied_volumeclaim = volClaim.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration']
+        persist_resource(last_applied_volumeclaim, f'{_get_resourcedir(namespace, deploy_name)}/old_pvc')
+        last_applied_volumeclaim = (eval(last_applied_volumeclaim))
+        last_applied_volumeclaim['spec']['storageClassName'] = new_storageclass
+        del last_applied_volumeclaim['spec']['volumeName']
 
-        labels = last_applied['metadata']['labels'].items()
-        new_labels = {}
-        for key, value in labels:
-            new_labels[key] = value + '-csi'
-        last_applied['metadata']['labels'] = new_labels
+        if 'labels' in last_applied_volumeclaim['metadata'].keys():
+            labels = last_applied_volumeclaim['metadata']['labels'].items()
+            new_labels = {}
+            for key, value in labels:
+                new_labels[key] = value + '-csi'
+            last_applied_volumeclaim['metadata']['labels'] = new_labels
 
-        name = last_applied['metadata']['name']
-        last_applied['metadata']['name'] = name + '-csi'
+        name = last_applied_volumeclaim['metadata']['name']
+        last_applied_volumeclaim['metadata']['name'] = name + '-csi'
         pvc = V1PersistentVolumeClaim(
-            spec=last_applied['spec'], metadata=last_applied['metadata'], kind=last_applied['kind'], api_version=last_applied['apiVersion'])
-        saved_old_volumes.append(name)
+            spec=last_applied_volumeclaim['spec'],
+            metadata=last_applied_volumeclaim['metadata'],
+            kind=last_applied_volumeclaim['kind'],
+            api_version=last_applied_volumeclaim['apiVersion'])
+        saved_old_volumeclaims.append(name)
 
+        pvc_dict = pvc.to_dict()
+        persist_resource(pvc_dict, f'{_get_resourcedir(namespace, deploy_name)}/new_pvc')
         try:
-            core_v1.create_namespaced_persistent_volume_claim(namespace=namespace, body=pvc)
-            print(f"{Fore.GREEN} PVC created.")
+            core_v1.create_namespaced_persistent_volume_claim(namespace=ns, body=pvc)
+            print(f"{Fore.GREEN} PVC {name} created.")
         except ApiException as e:
             print(f"{Fore.RED} PVC {name} wasn't created.")
             pass
-    return saved_old_volumes
+    return saved_old_volumeclaims
 
 
-def get_namespaces_scope(mode):
-    ns = ['testing']
-    if mode == '-a':
-        ns = [namespace.metadata.name for namespace in core_v1.list_namespace().items]
-    elif mode == '-n':
-        ns = [namespace for namespace in sys.argv if namespace != __file__ if namespace != '-n']
-    return ns
-
-
-def build_and_push_rsync_image():
-    image_version = 'v17'
-    subprocess.run(f'docker build -t lockat/toolpod:{image_version} .', shell=True)
-    subprocess.run(f'docker push lockat/toolpod:{image_version}', shell=True)
-
-
-def deployment_only_has_one_container(deployment):
-    last_applied = eval(k8s_deployment.metadata.annotations['kubectl.kubernetes.io/last-applied-configuration'])
+def deployment_only_has_one_container(last_applied):
     if len(last_applied['spec']['template']['spec']['containers']) == 1:
         return True
-    else:
-        return False
+
+
+def wait_for_creating_or_terminating(name, has_pods, resource):
+    if has_pods:
+        print(f'{Fore.WHITE} wait until resource is scaled to 0...')
+        while has_pods:
+            has_pods = _check_output(name, resource)
+    elif not has_pods:
+        print(f'{Fore.WHITE} wait until resource is created..')
+        while not has_pods:
+            has_pods = _check_output(name, resource)
+
+
+def _check_output(name, resource):
+    try:
+        time.sleep(4.0)
+        data = subprocess.check_output(f'kubectl get {resource} -n {namespace} | grep {name}', shell=True)
+        print(str(data.decode('utf-8')))
+        if '1/1' in str(data.decode('utf-8')):
+            return True
+        else:
+            return False
+    except subprocess.CalledProcessError as e:
+        print(e)
+
+
+def scale_deployment_to_0(deployment_name, namespace):
+    kubectl(f'scale deploy {deployment_name} --replicas=0', namespace)  # wait
+    wait_for_creating_or_terminating(deployment_name, has_pods=True, resource='pods')
+
+
+def _get_resourcedir(ns, deployname):
+    return os.path.join(os.getcwd(), ns, deployname)
+
+
+def create_resource_dir(ns, deployname):
+    dirpath = _get_resourcedir(ns, deployname)
+    if os.path.isdir(dirpath):
+        rmtree(dirpath)
+    os.makedirs(dirpath)
+    return dirpath
+
+
+def persist_resource(last_applied, filename):
+    with open(f'{filename}.json', 'w') as file:
+        json.dump(last_applied, file)
 
 
 if __name__ == '__main__':
+    colorama.init(autoreset=True)
+
+    parser = argparse.ArgumentParser(description='This script migrates volumes to another storage class.')
+    parser.add_argument('--namespaces', metavar='<namespace>', type=str,
+                        help='the namespaces in which you want to migrate volumes. multiple namespaces are separated '
+                             'by comma without any whitespaces.',
+                        default='testing',
+                        required=False)
+    parser.add_argument('--old_storageclass', metavar='<storageclass>', type=str,
+                        help='the storage class that should be replaced by another.',
+                        default='testing',
+                        required=True)
+    parser.add_argument('--new_storageclass', metavar='<storageclass>', type=str,
+                        help='the new storage class that you want to apply.',
+                        default='testing',
+                        required=True)
+    args = parser.parse_args()
+
+    namespaces = args.namespaces.split(',')
+    old_storageclass = args.old_storageclass
+    new_storageclass = args.new_storageclass
+
     # defaults
-    mode = ''
-    testing = True
-
-    dialog.want_to_proceed()
-
+    dialog.want_to_start(namespaces, old_storageclass, new_storageclass)
     config.load_kube_config('~/.kube/config')
     urllib3.disable_warnings()
-    colorama.init(autoreset=True)
+
     core_v1 = client.CoreV1Api()
     apps_v1 = client.AppsV1Api()
 
-    namespaces = get_namespaces_scope(mode)
-
     for namespace in namespaces:
-        deployments = kubectl("get Deployments -o jsonpath='{.items}'", namespace)
+        try:
+            deployments = kubectl("get Deployments -o jsonpath='{.items}'", namespace)
+        except subprocess.CalledProcessError as e:
+            sys.exit(0)
 
         for d in deployments:
-            deployment_name = ''
-            is_flexvolume = False
-            volume = d['spec']['template']['spec']['volumes']
+            deploy_name = ''
 
-            if testing:
-                # for security reasons while testing: only choose deployments that explicitly contain 'test' in their name
-                # and ignore that we only want to find flexvolumes
-                if 'test' in d['metadata']['name']:
-                    deployment_name = d['metadata']['name']
-            else:
-                deployment_name = d['metadata']['name']
+            try:
+                pvcs = [core_v1.read_namespaced_persistent_volume_claim(
+                    namespace=namespace, name=vol['persistentVolumeClaim']['claimName'])
+                    for vol in d['spec']['template']['spec']['volumes']]
+            except KeyError as e:
+                continue
+
+            selected_volumeclaims = [pvc for pvc in pvcs if pvc.spec.storage_class_name == old_storageclass]
+
+            if selected_volumeclaims:
+                deploy_name = d['metadata']['name']
+                scale_deployment_to_0(deploy_name, namespace)
+
+                k8s_deployment = apps_v1.read_namespaced_deployment(namespace=namespace, name=deploy_name)
+                last_applied_deployment = get_last_applied_deployment(k8s_deployment)
+                if not last_applied_deployment:
+                    print(
+                        f'{Fore.RED} "last applied" not found in deployment {deploy_name}. migration was not started.')
+                    continue
+
+                resource_dir = create_resource_dir(namespace, deploy_name)
+                persist_resource(last_applied_deployment, f'{resource_dir}/deployment')
+
                 try:
-                    is_flexvolume = volume[0]['flexVolume']
-                except KeyError:
-                    is_flexvolume = None
+                    if deployment_only_has_one_container(last_applied_deployment):
+                        if dialog.want_to_proceed(deploy_name, selected_volumeclaims, new_storageclass):
+                            saved_old_volumeclaims = create_csi_volumes(selected_volumeclaims, namespace, new_storageclass)
+                            prepare_toolpod(namespace, saved_old_volumeclaims, deploy_name)  # mount old and new volume(s)
 
-            if is_flexvolume or testing:
-                kubectl(f'scale deploy {deployment_name} --replicas=0', namespace)  # wait
-                k8s_deployment = apps_v1.read_namespaced_deployment(namespace=namespace, name=deployment_name)
-                if deployment_only_has_one_container(k8s_deployment):
-                    current_volumes = k8s_deployment.spec.template.spec.volumes
-                    saved_old_volumes = create_csi_volumes(current_volumes, namespace)
-                    mountpaths = get_volume_list_and_mount_paths(k8s_deployment)[0]
-                    pathmapper = prepare_toolpod(namespace, saved_old_volumes, mountpaths)  # mount old and new volume(s)
-                    start_toolpod(namespace)  # execute rsync
-                    last_applied = replace_old_volumes_with_new(k8s_deployment, saved_old_volumes)  # add mountPath and pvc
-                    create_new_deployment(last_applied)  # apply to k8s
+                            start_toolpod(namespace, deploy_name)  # rsync pod
+                            modified_last_applied_deployment = replace_old_volumes_with_new(last_applied_deployment,
+                                                                                            saved_old_volumeclaims)  # add mountPath and pvc
+                            persist_resource(modified_last_applied_deployment, f'{resource_dir}/csi_deployment')
+                            create_new_deployment(deploy_name, namespace, f'{resource_dir}/csi_deployment')  # apply to k8s
+                    else:
+                        print(
+                            f"{Fore.RED} deployment {deploy_name} contains more than one container. "
+                            f"migration was not started.")
+                except:
+                    print(f"{Fore.RED} migration failed. old deployment is going to applied...")
+                finally:
+                    create_new_deployment(deploy_name, namespace, f'{resource_dir}/csi_deployment')
